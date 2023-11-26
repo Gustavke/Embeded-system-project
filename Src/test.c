@@ -8,10 +8,22 @@
 #include  "stdbool.h"
 #include  "traffic_light_functions.h"
 void test_traffic_light(){
-	for(int i = 0; i < 18; i++){
-	traffic_light_set(i);
-	transmit_buffer();
-	}
+	set_traffic_light(tl1,Green);
+	set_traffic_light(tl1,Yellow);
+	set_traffic_light(tl1,Red);
+
+	set_traffic_light(tl2,Green);
+	set_traffic_light(tl2,Yellow);
+	set_traffic_light(tl2,Red);
+
+	set_traffic_light(tl3,Green);
+	set_traffic_light(tl3,Yellow);
+	set_traffic_light(tl3,Red);
+
+	set_traffic_light(tl4,Green);
+	set_traffic_light(tl4,Yellow);
+	set_traffic_light(tl4,Red);
+
 }
 
 
