@@ -34,6 +34,8 @@ extern const TrafficLight tl1;
 extern const TrafficLight tl2;
 extern const TrafficLight tl3;
 extern const TrafficLight tl4;
+extern const TrafficLight pl1;
+extern const TrafficLight pl2;
 
 extern uint32_t trafficLightBuffer;
 
