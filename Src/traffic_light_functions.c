@@ -72,14 +72,21 @@ void traffic_buffer_reset_bit(uint8_t offset) {
 	trafficLightBuffer &= ~(1 << offset);
 }
 
+// Function to toggle a specific bit in the trafficLightBuffer
+void traffic_buffer_toggle_bit(uint8_t offset) {
+	trafficLightBuffer ^= 1 << offset;
+}
+
 // Function to transmit the trafficLightBuffer over SPI
 void transmit_buffer() {
-    // Set the STCP pin low before data transmission
-    HAL_GPIO_WritePin(_595_STCP_GPIO_Port, _595_STCP_Pin, 0);
-    // Transmit the trafficLightBuffer over SPI
-    HAL_SPI_Transmit(&hspi3, (uint8_t*) &trafficLightBuffer, 3, 100);
-    // Set the STCP pin high to latch the data
-    HAL_GPIO_WritePin(_595_STCP_GPIO_Port, _595_STCP_Pin, 1);
+	//HAL_NVIC_DisableIRQ(TIM1_UP_TIM16_IRQn);
+	// Set the STCP pin low before data transmission
+	HAL_GPIO_WritePin(_595_STCP_GPIO_Port, _595_STCP_Pin, 0);
+	// Transmit the trafficLightBuffer over SPI
+	HAL_SPI_Transmit(&hspi3, (uint8_t*) &trafficLightBuffer, 3, 100);
+	// Set the STCP pin high to latch the data
+	HAL_GPIO_WritePin(_595_STCP_GPIO_Port, _595_STCP_Pin, 1);
+	//HAL_NVIC_EnableIRQ(TIM1_UP_TIM16_IRQn);
 }
 
 // Function to set the SR-buffer to represent color of a specific traffic light
@@ -102,19 +109,62 @@ void set_shiftregister_buffer(TrafficLight tl, uint8_t color) {
 
 }
 
+// Function to toggle the blue light of a specific traffic light
+void toggle_blue_light(TrafficLight tl) {
+	// Toggle the blue light bit at the offset
+	trafficLightBuffer ^= (PL_BLUE << tl.offset);
+
+	// Transmit the updated buffer to update the physical lights
+	transmit_buffer();
+}
+
 // Function to set the color of traffic lights on a road and update the pedestrian light accordingly
 void set_traffic_lights(Road road, uint8_t color) {
-    // Set the color of each traffic light on the road
-    set_shiftregister_buffer(road.trafficLight1, color);
-    set_shiftregister_buffer(road.trafficLight2, color);
+	// Set the color of each traffic light on the road
+	set_shiftregister_buffer(road.trafficLight1, color);
+	set_shiftregister_buffer(road.trafficLight2, color);
 
-    // Update the pedestrian light based on the specified color
-    if (color == Red) {
-        set_shiftregister_buffer(road.pedestrianLight, Green);
-    } else {
-        set_shiftregister_buffer(road.pedestrianLight, Red);
-    }
+	// Update the pedestrian light based on the specified color
+	if (color == Red) {
+		set_shiftregister_buffer(road.pedestrianLight, Green);
+	} else {
+		set_shiftregister_buffer(road.pedestrianLight, Red);
+	}
 
-    // Transmit the updated buffer to update the physical lights
-    transmit_buffer();
+	// Transmit the updated buffer to update the physical lights
+	transmit_buffer();
+}
+
+void _turn_off_lights() {
+	trafficLightBuffer = 0;
+	transmit_buffer();
+}
+
+int pedestrian_button_pressed(uint8_t crossing) {
+	switch (crossing) {
+	case 1:
+		return 1 ^ HAL_GPIO_ReadPin(PL1_Switch_GPIO_Port, PL1_Switch_Pin);
+		break;
+	case 2:
+		return 1 ^ HAL_GPIO_ReadPin(PL2_Switch_GPIO_Port, PL2_Switch_Pin);
+		break;
+	}
+}
+
+// Function to check if a car is present in a specified lane
+int is_car_present(uint8_t lane) {
+	switch (lane) {
+	case 1:
+		return HAL_GPIO_ReadPin(TL1_Car_GPIO_Port, TL1_Car_Pin);
+		break;
+	case 2:
+		return HAL_GPIO_ReadPin(TL2_Car_GPIO_Port, TL2_Car_Pin);
+		break;
+	case 3:
+		return HAL_GPIO_ReadPin(TL3_Car_GPIO_Port, TL3_Car_Pin);
+		break;
+	case 4:
+		return HAL_GPIO_ReadPin(TL4_Car_GPIO_Port, TL4_Car_Pin);
+		break;
+	}
 }

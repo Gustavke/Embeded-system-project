@@ -30,6 +30,13 @@ typedef struct {
     uint8_t green;
 } TrafficLight;
 
+// Struct to represent road directions
+typedef struct {
+	TrafficLight trafficLight1;
+	TrafficLight trafficLight2;
+	TrafficLight pedestrianLight;
+} Road;
+
 extern const TrafficLight tl1;
 extern const TrafficLight tl2;
 extern const TrafficLight tl3;
@@ -37,11 +44,20 @@ extern const TrafficLight tl4;
 extern const TrafficLight pl1;
 extern const TrafficLight pl2;
 
+extern const Road verticalRoad;
+extern const Road horizontalRoad;
+
 extern uint32_t trafficLightBuffer;
 
 void traffic_buffer_set_bit(uint8_t offset);
 void traffic_buffer_reset_bit(uint8_t offset);
+void traffic_buffer_toggle_bit(uint8_t offset);
 void transmit_buffer(void);
+void toggle_blue_light(TrafficLight tl);
 void set_traffic_light(TrafficLight tl, uint8_t color);
+void set_traffic_lights(Road road, uint8_t color);
+void _turn_off_lights();
+int pedestrian_button_pressed(uint8_t crossing);
+int is_car_present(uint8_t lane);
 
 #endif /* INC_TRAFFIC_LIGHT_FUNCTIONS_H_ */
