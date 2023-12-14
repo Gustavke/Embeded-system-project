@@ -59,6 +59,9 @@ const TrafficLight pl2 = { PL2_OFFSET, PL_RED, 0, PL_GREEN };
 const Road verticalRoad = { tl2, tl4, pl2 };
 const Road horizontalRoad = { tl1, tl3, pl1 };
 
+uint8_t pd1Pressed = 0;
+uint8_t pd2Pressed = 0;
+
 // Buffer to store the current state of traffic lights
 uint32_t trafficLightBuffer;
 
@@ -80,6 +83,7 @@ void traffic_buffer_toggle_bit(uint8_t offset) {
 // Function to transmit the trafficLightBuffer over SPI
 void transmit_buffer() {
 	//HAL_NVIC_DisableIRQ(TIM1_UP_TIM16_IRQn);
+	//NVIC_GetEnableIRQ()
 	// Set the STCP pin low before data transmission
 	HAL_GPIO_WritePin(_595_STCP_GPIO_Port, _595_STCP_Pin, 0);
 	// Transmit the trafficLightBuffer over SPI
@@ -140,31 +144,67 @@ void _turn_off_lights() {
 	transmit_buffer();
 }
 
+void set_pedestrian_button_pressed(uint8_t button){
+	switch(button){
+	case 1:
+		pd1Pressed = 1;
+		break;
+	case 2:
+		pd2Pressed = 1;
+		break;
+	}
+}
+
+void reset_pedestrian_button_pressed(uint8_t button){
+	switch(button){
+	case 1:
+		pd1Pressed = 0;
+		break;
+	case 2:
+		pd2Pressed = 0;
+		break;
+	}
+}
+
 int pedestrian_button_pressed(uint8_t crossing) {
 	switch (crossing) {
 	case 1:
-		return 1 ^ HAL_GPIO_ReadPin(PL1_Switch_GPIO_Port, PL1_Switch_Pin);
+		return pd1Pressed;
 		break;
 	case 2:
-		return 1 ^ HAL_GPIO_ReadPin(PL2_Switch_GPIO_Port, PL2_Switch_Pin);
+		return pd2Pressed;
 		break;
 	}
+	return -1;
 }
 
 // Function to check if a car is present in a specified lane
 int is_car_present(uint8_t lane) {
 	switch (lane) {
 	case 1:
-		return HAL_GPIO_ReadPin(TL1_Car_GPIO_Port, TL1_Car_Pin);
+		return 1 ^ HAL_GPIO_ReadPin(TL1_Car_GPIO_Port, TL1_Car_Pin);
 		break;
 	case 2:
-		return HAL_GPIO_ReadPin(TL2_Car_GPIO_Port, TL2_Car_Pin);
+		return 1 ^ HAL_GPIO_ReadPin(TL2_Car_GPIO_Port, TL2_Car_Pin);
 		break;
 	case 3:
-		return HAL_GPIO_ReadPin(TL3_Car_GPIO_Port, TL3_Car_Pin);
+		return 1 ^ HAL_GPIO_ReadPin(TL3_Car_GPIO_Port, TL3_Car_Pin);
 		break;
 	case 4:
-		return HAL_GPIO_ReadPin(TL4_Car_GPIO_Port, TL4_Car_Pin);
+		return 1 ^ HAL_GPIO_ReadPin(TL4_Car_GPIO_Port, TL4_Car_Pin);
 		break;
 	}
+	return -1;
+}
+
+int h_car_present(){
+	if(is_car_present(1) ||is_car_present(3))
+		return 1;
+	return 0;
+}
+
+int v_car_present(){
+	if(is_car_present(2) ||is_car_present(4))
+		return 1;
+	return 0;
 }
