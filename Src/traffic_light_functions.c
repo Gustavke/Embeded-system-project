@@ -144,8 +144,8 @@ void _turn_off_lights() {
 	transmit_buffer();
 }
 
-void set_pedestrian_button_pressed(uint8_t button){
-	switch(button){
+void set_pedestrian_button_pressed(uint8_t button) {
+	switch (button) {
 	case 1:
 		pd1Pressed = 1;
 		break;
@@ -155,8 +155,8 @@ void set_pedestrian_button_pressed(uint8_t button){
 	}
 }
 
-void reset_pedestrian_button_pressed(uint8_t button){
-	switch(button){
+void reset_pedestrian_button_pressed(uint8_t button) {
+	switch (button) {
 	case 1:
 		pd1Pressed = 0;
 		break;
@@ -197,14 +197,32 @@ int is_car_present(uint8_t lane) {
 	return -1;
 }
 
-int h_car_present(){
-	if(is_car_present(1) ||is_car_present(3))
+int h_car_present() {
+	if (is_car_present(1) || is_car_present(3))
 		return 1;
 	return 0;
 }
 
-int v_car_present(){
-	if(is_car_present(2) ||is_car_present(4))
+int v_car_present() {
+	if (is_car_present(2) || is_car_present(4))
 		return 1;
 	return 0;
+}
+
+void transistion_vertical_to_green(uint32_t yellowDelay) {
+	set_traffic_lights(horizontalRoad, Yellow);
+	HAL_Delay(yellowDelay);
+	set_traffic_lights(horizontalRoad, Red);
+	set_traffic_lights(verticalRoad, Yellow);
+	HAL_Delay(yellowDelay);
+	set_traffic_lights(verticalRoad, Green);
+}
+
+void transistion_horizontal_to_green(uint32_t yellowDelay) {
+	set_traffic_lights(verticalRoad, Yellow);
+	HAL_Delay(yellowDelay);
+	set_traffic_lights(verticalRoad, Red);
+	set_traffic_lights(horizontalRoad, Yellow);
+	HAL_Delay(yellowDelay);
+	set_traffic_lights(horizontalRoad, Green);
 }

@@ -66,5 +66,7 @@ int pedestrian_button_pressed(uint8_t crossing);
 int is_car_present(uint8_t lane);
 int h_car_present();
 int v_car_present();
+void transistion_horizontal_to_green(uint32_t yellowDelay);
+void transistion_vertical_to_green(uint32_t yellowDelay);
 
 #endif /* INC_TRAFFIC_LIGHT_FUNCTIONS_H_ */

@@ -99,7 +99,7 @@ int main(void)
 #ifdef RUN_TEST_PROGRAM
 	test_program();
 #else
-	traffic_light();
+	traffic_light_3();
 #endif
 
   /* USER CODE END 2 */
