@@ -8,6 +8,7 @@
 #include  "stdbool.h"
 #include  "traffic_light_functions.h"
 #include "tim.h"
+#include "stm32l4xx_it.h"
 // Function to test the shift register buffer by setting different colors and transmitting
 
 void test_shiftregister_buffer() {
@@ -147,8 +148,30 @@ void test_blinking_light() {
 		HAL_Delay(5000);
 	}
 }
+void test_if_interrupt_enabled() {
+	_turn_off_lights();
+	while (1) {
+		_turn_off_lights();
 
+		HAL_NVIC_EnableIRQ(TIM1_UP_TIM16_IRQn);
+		if (NVIC->ISER[(uint32_t) ((int32_t) TIM1_UP_TIM16_IRQn) >> 5]
+				& (uint32_t) (1
+						<< ((uint32_t) ((int32_t) TIM1_UP_TIM16_IRQn)
+								& (uint32_t) 0x1F))) {
+			set_traffic_lights(verticalRoad, Green);
+		}
+		HAL_NVIC_DisableIRQ(TIM1_UP_TIM16_IRQn);
+		if (NVIC->ISER[(uint32_t) ((int32_t) TIM1_UP_TIM16_IRQn) >> 5]
+				& (uint32_t) (1
+						<< ((uint32_t) ((int32_t) TIM1_UP_TIM16_IRQn)
+								& (uint32_t) 0x1F))) {
+			set_traffic_lights(verticalRoad, Red);
+		}
+
+	}
+}
 void test_program(void) {
+	test_if_interrupt_enabled();
 	test_blinking_light();
 	//test_pedestrian_buttons();
 	test_car_switches();
